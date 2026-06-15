@@ -1,0 +1,1314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>GapAssess Pro — ISO & Certification Readiness</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.0/chart.umd.min.js"></script>
+<style>
+/* ── RESET & BASE ── */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  /* Brand palette */
+  --ink:#0D1117;
+  --ink2:#3D4451;
+  --ink3:#6B7280;
+  --ink4:#9CA3AF;
+  --paper:#FFFFFF;
+  --paper2:#F7F8FA;
+  --paper3:#EFF1F5;
+  --line:#E4E7ED;
+  --line2:#CDD1DA;
+
+  /* Accent — deep teal-navy */
+  --accent:#0E6B5E;
+  --accent-light:#E6F4F1;
+  --accent-mid:#1A9B88;
+  --accent-bright:#22C9B0;
+
+  /* Category colors */
+  --c-quality:#2563EB;   --c-quality-bg:#EFF6FF;
+  --c-security:#7C3AED; --c-security-bg:#F5F3FF;
+  --c-safety:#DC2626;   --c-safety-bg:#FEF2F2;
+  --c-sustain:#16A34A;  --c-sustain-bg:#F0FDF4;
+  --c-gov:#D97706;      --c-gov-bg:#FFFBEB;
+  --c-ops:#0891B2;      --c-ops-bg:#ECFEFF;
+  --c-food:#B45309;     --c-food-bg:#FFF7ED;
+  --c-sustcert:#065F46; --c-sustcert-bg:#ECFDF5;
+  --c-tech:#6D28D9;     --c-tech-bg:#F5F3FF;
+  --c-risk:#9D174D;     --c-risk-bg:#FFF1F2;
+
+  /* RAG */
+  --rag-r:#DC2626;--rag-r-bg:#FEE2E2;
+  --rag-a:#D97706;--rag-a-bg:#FEF3C7;
+  --rag-g:#16A34A;--rag-g-bg:#DCFCE7;
+  --rag-b:#2563EB;--rag-b-bg:#DBEAFE;
+
+  --radius:12px;--radius-sm:8px;--radius-xs:6px;
+  --shadow:0 1px 3px rgba(0,0,0,.08),0 1px 2px rgba(0,0,0,.06);
+  --shadow-md:0 4px 12px rgba(0,0,0,.10),0 2px 4px rgba(0,0,0,.06);
+  --font:'DM Sans',system-ui,sans-serif;
+  --font-body:'Inter',system-ui,sans-serif;
+}
+
+html,body{height:100%;background:var(--paper2);color:var(--ink);font-family:var(--font-body);font-size:14px;line-height:1.6}
+
+/* ── SIDEBAR LAYOUT ── */
+.layout{display:flex;min-height:100vh}
+
+.sidebar{width:240px;background:var(--ink);flex-shrink:0;display:flex;flex-direction:column;position:fixed;top:0;left:0;height:100vh;z-index:300;overflow-y:auto}
+.sidebar-brand{padding:22px 20px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.brand-logo{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.brand-icon{width:36px;height:36px;background:linear-gradient(135deg,var(--accent-mid),var(--accent-bright));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.brand-name{font-family:var(--font);font-size:17px;font-weight:700;color:#fff;letter-spacing:-.3px}
+.brand-sub{font-size:11px;color:rgba(255,255,255,.4);margin-top:2px}
+
+.nav-section{padding:16px 12px 4px}
+.nav-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:rgba(255,255,255,.3);padding:0 8px;margin-bottom:6px}
+.nav-item{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:var(--radius-xs);cursor:pointer;color:rgba(255,255,255,.55);font-size:13px;font-weight:500;transition:all .15s;margin-bottom:2px;text-decoration:none}
+.nav-item:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85)}
+.nav-item.active{background:var(--accent);color:#fff}
+.nav-icon{font-size:16px;width:20px;text-align:center;flex-shrink:0}
+.nav-badge{margin-left:auto;background:rgba(255,255,255,.15);color:rgba(255,255,255,.7);font-size:10px;padding:1px 6px;border-radius:10px;font-weight:600}
+.nav-item.active .nav-badge{background:rgba(255,255,255,.25)}
+
+.sidebar-footer{margin-top:auto;padding:16px 12px;border-top:1px solid rgba(255,255,255,.08)}
+.sidebar-footer p{font-size:11px;color:rgba(255,255,255,.25);line-height:1.5}
+
+.main{margin-left:240px;flex:1;min-width:0}
+
+/* ── TOPBAR ── */
+.topbar{background:var(--paper);border-bottom:1px solid var(--line);padding:0 28px;height:58px;display:flex;align-items:center;gap:16px;position:sticky;top:0;z-index:200}
+.page-title{font-family:var(--font);font-size:17px;font-weight:700;letter-spacing:-.3px}
+.page-sub{font-size:12px;color:var(--ink3);margin-top:1px}
+.topbar-right{margin-left:auto;display:flex;gap:8px;align-items:center}
+.tb-chip{padding:6px 14px;border:1px solid var(--line);border-radius:20px;background:var(--paper2);color:var(--ink2);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.tb-chip:hover{border-color:var(--accent);color:var(--accent)}
+.tb-chip.primary{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ── CONTENT ── */
+.content{padding:24px 28px 40px}
+
+/* ── HERO BANNER ── */
+.hero-banner{background:linear-gradient(135deg,#0D1117 0%,#0E2B27 50%,#0E3D36 100%);border-radius:var(--radius);padding:28px 32px;margin-bottom:24px;position:relative;overflow:hidden}
+.hero-banner::before{content:'';position:absolute;right:-40px;top:-40px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(34,201,176,.15) 0%,transparent 70%)}
+.hero-banner::after{content:'';position:absolute;right:80px;bottom:-60px;width:160px;height:160px;border-radius:50%;background:radial-gradient(circle,rgba(14,107,94,.3) 0%,transparent 70%)}
+.hero-title{font-family:var(--font);font-size:22px;font-weight:700;color:#fff;margin-bottom:6px;letter-spacing:-.4px}
+.hero-sub{font-size:13px;color:rgba(255,255,255,.55);max-width:520px;line-height:1.6}
+.hero-chips{display:flex;gap:8px;margin-top:16px;flex-wrap:wrap}
+.hero-chip{padding:4px 12px;border-radius:20px;font-size:11px;font-weight:600;background:rgba(255,255,255,.1);color:rgba(255,255,255,.75);border:1px solid rgba(255,255,255,.15)}
+
+/* ── STAT CARDS ── */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:18px;position:relative;overflow:hidden}
+.stat-card::before{content:'';position:absolute;top:0;left:0;width:4px;height:100%;background:var(--accent)}
+.stat-accent-red::before{background:var(--rag-r)}
+.stat-accent-amber::before{background:var(--rag-a)}
+.stat-accent-green::before{background:var(--rag-g)}
+.stat-accent-blue::before{background:var(--rag-b)}
+.stat-icon{font-size:20px;margin-bottom:8px}
+.stat-num{font-family:var(--font);font-size:28px;font-weight:700;letter-spacing:-.5px;line-height:1}
+.stat-lbl{font-size:11px;color:var(--ink3);margin-top:5px;font-weight:500}
+
+/* ── FILTER ── */
+.filter-row{display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap;align-items:center}
+.search-wrap{position:relative;flex:1;min-width:200px;max-width:320px}
+.search-icon{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--ink4);font-size:15px;pointer-events:none}
+.search-input{width:100%;padding:9px 12px 9px 32px;border:1px solid var(--line);border-radius:var(--radius-sm);background:var(--paper);color:var(--ink);font-size:13px;font-family:var(--font-body);transition:border-color .15s}
+.search-input:focus{outline:none;border-color:var(--accent)}
+.filter-pills{display:flex;gap:6px;flex-wrap:wrap}
+.fpill{padding:7px 14px;border:1px solid var(--line);border-radius:20px;background:var(--paper);color:var(--ink3);font-size:12px;font-weight:500;cursor:pointer;transition:all .15s}
+.fpill:hover{border-color:var(--accent);color:var(--accent)}
+.fpill.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* ── CATEGORY SECTION ── */
+.cat-section{margin-bottom:28px}
+.cat-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.cat-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.cat-label{font-family:var(--font);font-size:13px;font-weight:700;letter-spacing:.2px}
+.cat-count{font-size:11px;color:var(--ink3);background:var(--paper3);padding:2px 8px;border-radius:10px;font-weight:600;margin-left:auto}
+
+/* ── ISO CARD ── */
+.iso-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:10px}
+.iso-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:16px;cursor:pointer;transition:all .18s;position:relative}
+.iso-card:hover{border-color:var(--accent);box-shadow:var(--shadow-md);transform:translateY(-1px)}
+.iso-card.started{border-left:3px solid var(--rag-a)}
+.iso-card.complete{border-left:3px solid var(--rag-g)}
+.iso-card.not-started{border-left:3px solid var(--line2)}
+.card-header{display:flex;align-items:flex-start;gap:12px;margin-bottom:12px}
+.card-cat-icon{width:42px;height:42px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.card-info{flex:1;min-width:0}
+.card-std-line{display:flex;align-items:center;gap:6px;margin-bottom:3px;flex-wrap:wrap}
+.card-std{font-size:11px;color:var(--ink3);font-weight:600}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 7px;border-radius:10px;font-size:10px;font-weight:700;letter-spacing:.2px}
+.badge-acc{background:var(--rag-g-bg);color:var(--rag-g)}
+.badge-guide{background:var(--paper3);color:var(--ink3)}
+.badge-new{background:#EFF6FF;color:#1D4ED8}
+.card-name{font-family:var(--font);font-size:14px;font-weight:700;line-height:1.3;color:var(--ink)}
+.prog-bar{height:5px;background:var(--paper3);border-radius:5px;overflow:hidden;margin:10px 0 8px}
+.prog-fill{height:100%;border-radius:5px;transition:width .4s;background:linear-gradient(90deg,var(--accent),var(--accent-bright))}
+.card-footer{display:flex;justify-content:space-between;align-items:center}
+.card-score-txt{font-size:11px;color:var(--ink3)}
+.card-cta{font-size:12px;font-weight:700;color:var(--accent)}
+.card-cta-done{color:var(--rag-g)}
+
+/* ── ASSESS ── */
+.assess-topbar{background:var(--paper);border-bottom:1px solid var(--line);padding:14px 28px}
+.back-btn{display:inline-flex;align-items:center;gap:6px;font-size:13px;color:var(--ink3);background:none;border:none;cursor:pointer;padding:0;font-family:var(--font-body);margin-bottom:10px}
+.back-btn:hover{color:var(--accent)}
+.assess-title{font-family:var(--font);font-size:20px;font-weight:700;letter-spacing:-.3px}
+.assess-desc{font-size:13px;color:var(--ink3);margin-top:3px}
+.prog-header{display:flex;align-items:center;gap:12px;margin-top:14px}
+.ph-track{flex:1;height:7px;background:var(--paper3);border-radius:7px;overflow:hidden}
+.ph-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent-bright));border-radius:7px;transition:width .3s}
+.ph-pct{font-size:12px;font-weight:700;color:var(--accent);min-width:40px;text-align:right}
+.ph-txt{font-size:12px;color:var(--ink3)}
+
+.clauses-content{padding:20px 28px 8px;max-width:900px}
+.clause-card{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-bottom:12px;transition:border-color .15s}
+.clause-card:focus-within{border-color:var(--accent)}
+.cl-num{display:inline-flex;align-items:center;gap:6px;font-size:11px;font-weight:700;color:var(--ink3);letter-spacing:.5px;text-transform:uppercase;margin-bottom:5px}
+.cl-dot{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.cl-title{font-family:var(--font);font-size:15px;font-weight:700;color:var(--ink);margin-bottom:8px;line-height:1.4}
+.cl-guide{font-size:12px;color:var(--ink3);background:var(--paper2);border-left:3px solid var(--accent-light);padding:9px 12px;border-radius:0 var(--radius-xs) var(--radius-xs) 0;margin-bottom:12px;line-height:1.6}
+
+.rating-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:8px;margin-bottom:14px}
+.r-tile{padding:10px 8px;border:2px solid var(--line);border-radius:var(--radius-sm);cursor:pointer;text-align:center;transition:all .15s;background:var(--paper)}
+.r-tile:hover{border-color:var(--line2);background:var(--paper2)}
+.r-dot{width:28px;height:28px;border-radius:50%;margin:0 auto 6px;display:flex;align-items:center;justify-content:center;font-size:14px}
+.r-lbl{font-size:11px;font-weight:600;color:var(--ink2)}
+.r-tile.sel-0{border-color:var(--rag-r)!important;background:var(--rag-r-bg)}
+.r-tile.sel-0 .r-dot{background:var(--rag-r)}
+.r-tile.sel-0 .r-lbl{color:var(--rag-r)}
+.r-tile.sel-1{border-color:var(--rag-a)!important;background:var(--rag-a-bg)}
+.r-tile.sel-1 .r-dot{background:var(--rag-a)}
+.r-tile.sel-1 .r-lbl{color:var(--rag-a)}
+.r-tile.sel-2{border-color:var(--rag-b)!important;background:var(--rag-b-bg)}
+.r-tile.sel-2 .r-dot{background:var(--rag-b)}
+.r-tile.sel-2 .r-lbl{color:var(--rag-b)}
+.r-tile.sel-3{border-color:var(--rag-g)!important;background:var(--rag-g-bg)}
+.r-tile.sel-3 .r-dot{background:var(--rag-g)}
+.r-tile.sel-3 .r-lbl{color:var(--rag-g)}
+
+.field-label{font-size:11px;font-weight:700;color:var(--ink3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:5px}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px}
+textarea.field-input,input.field-input{width:100%;padding:9px 11px;border:1px solid var(--line);border-radius:var(--radius-xs);font-family:var(--font-body);font-size:13px;color:var(--ink);background:var(--paper2);resize:vertical;transition:border-color .15s}
+textarea.field-input:focus,input.field-input:focus{outline:none;border-color:var(--accent);background:var(--paper)}
+textarea.field-input{min-height:64px}
+
+.assess-actions{padding:12px 28px 32px;display:flex;gap:10px;flex-wrap:wrap}
+.btn-primary{padding:10px 22px;background:var(--accent);color:#fff;border:none;border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:7px;transition:background .15s}
+.btn-primary:hover{background:var(--accent-mid)}
+.btn-outline{padding:10px 18px;background:var(--paper);color:var(--ink);border:1px solid var(--line);border-radius:var(--radius-sm);font-size:13px;font-weight:600;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:7px;transition:all .15s}
+.btn-outline:hover{border-color:var(--accent);color:var(--accent)}
+.btn-blue{padding:10px 18px;background:var(--rag-b-bg);color:var(--rag-b);border:1px solid var(--rag-b);border-radius:var(--radius-sm);font-size:13px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:7px}
+
+/* ── DASHBOARD ── */
+.dash-content{padding:0 28px 40px}
+.dash-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px}
+.panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:20px}
+.panel-full{grid-column:1/-1}
+.panel-title{font-family:var(--font);font-size:14px;font-weight:700;margin-bottom:16px;display:flex;align-items:center;gap:8px;color:var(--ink)}
+.panel-title span{font-size:16px}
+
+.result-row{padding:9px 0;border-bottom:1px solid var(--line);cursor:pointer}
+.result-row:last-child{border-bottom:none}
+.result-row:hover .rname{color:var(--accent)}
+.rt{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px}
+.rname{font-size:13px;font-weight:600;color:var(--ink);transition:color .15s}
+.rscore{font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px}
+.score-g{background:var(--rag-g-bg);color:var(--rag-g)}
+.score-b{background:var(--rag-b-bg);color:var(--rag-b)}
+.score-a{background:var(--rag-a-bg);color:var(--rag-a)}
+.score-r{background:var(--rag-r-bg);color:var(--rag-r)}
+.rbar{height:4px;background:var(--paper3);border-radius:4px;overflow:hidden}
+.rfill{height:100%;border-radius:4px;transition:width .5s}
+.fill-g{background:var(--rag-g)} .fill-b{background:var(--rag-b)} .fill-a{background:var(--rag-a)} .fill-r{background:var(--rag-r)}
+
+.action-row{padding:10px 12px;background:var(--paper2);border-radius:var(--radius-xs);margin-bottom:6px;border-left:3px solid var(--rag-b)}
+.action-std{font-size:10px;font-weight:700;color:var(--rag-b);letter-spacing:.3px;text-transform:uppercase}
+.action-txt{font-size:13px;color:var(--ink);margin-top:2px}
+.action-meta{font-size:11px;color:var(--ink3);margin-top:4px;display:flex;gap:12px;flex-wrap:wrap}
+
+/* ── CHART ── */
+.chart-wrap{position:relative;height:220px;margin-top:8px}
+
+/* ── RESULTS ── */
+.results-content{padding:0 28px 40px;max-width:900px}
+.compliance-banner{background:var(--accent);color:#fff;border-radius:var(--radius);padding:20px 24px;display:flex;align-items:center;gap:24px;margin-bottom:20px}
+.cb-score{font-family:var(--font);font-size:52px;font-weight:700;letter-spacing:-2px;line-height:1}
+.cb-label{font-size:13px;opacity:.75;margin-top:2px}
+.cb-right{flex:1}
+.cb-bar{height:10px;background:rgba(255,255,255,.2);border-radius:10px;overflow:hidden;margin:10px 0}
+.cb-fill{height:100%;background:#fff;border-radius:10px;transition:width .5s}
+.cb-chips{display:flex;gap:8px;flex-wrap:wrap}
+.cb-chip{padding:3px 10px;border-radius:12px;font-size:11px;font-weight:700;background:rgba(255,255,255,.15);color:#fff}
+
+.clause-result{padding:12px 0;border-bottom:1px solid var(--line)}
+.clause-result:last-child{border-bottom:none}
+.cr-top{display:flex;align-items:center;gap:10px;margin-bottom:4px}
+.cr-badge{padding:3px 9px;border-radius:10px;font-size:11px;font-weight:700}
+.cr-title{font-size:13px;font-weight:600;flex:1}
+.cr-bar{height:4px;background:var(--paper3);border-radius:4px;overflow:hidden;margin-bottom:6px}
+.cr-fill{height:100%;border-radius:4px}
+.cr-notes{display:flex;flex-direction:column;gap:4px}
+.cr-note{font-size:12px;color:var(--ink3);display:flex;gap:6px;align-items:flex-start}
+.cr-note-icon{flex-shrink:0;margin-top:1px}
+
+/* ── REPORT ── */
+.report-content{padding:0 28px 40px}
+.report-hero{background:var(--ink);color:#fff;border-radius:var(--radius);padding:24px 28px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px}
+.report-hero-title{font-family:var(--font);font-size:20px;font-weight:700;letter-spacing:-.4px;margin-bottom:4px}
+.report-hero-meta{font-size:12px;opacity:.5}
+.export-row{display:flex;gap:8px;flex-wrap:wrap}
+.btn-export{padding:9px 16px;border-radius:var(--radius-xs);font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font);display:inline-flex;align-items:center;gap:7px;border:none;transition:all .15s}
+.btn-txt{background:rgba(255,255,255,.1);color:#fff}
+.btn-txt:hover{background:rgba(255,255,255,.18)}
+.btn-pdf{background:var(--accent-mid);color:#fff}
+.btn-pdf:hover{background:var(--accent-bright)}
+
+.report-panel{background:var(--paper);border:1px solid var(--line);border-radius:var(--radius);padding:18px 20px;margin-bottom:14px}
+.rp-title{font-family:var(--font);font-size:14px;font-weight:700;margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--line);display:flex;align-items:center;gap:8px}
+.rp-row{display:flex;align-items:flex-start;gap:12px;padding:9px 0;border-bottom:1px solid var(--paper3)}
+.rp-row:last-child{border-bottom:none}
+.rp-lbl{font-size:11px;font-weight:700;color:var(--ink3);min-width:120px;flex-shrink:0;margin-top:2px;letter-spacing:.2px}
+.rp-val{font-size:13px;color:var(--ink);flex:1}
+.rp-rag{display:inline-flex;align-items:center;gap:5px;padding:2px 9px;border-radius:10px;font-size:11px;font-weight:700}
+.rp-r{background:var(--rag-r-bg);color:var(--rag-r)}
+.rp-a{background:var(--rag-a-bg);color:var(--rag-a)}
+.rp-g{background:var(--rag-g-bg);color:var(--rag-g)}
+.action-chip{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:10px;font-size:11px;background:var(--rag-b-bg);color:var(--rag-b);margin-top:5px;font-weight:600}
+
+/* ── SCREEN ── */
+.screen{display:none}.screen.active{display:block}
+
+/* ── TOAST ── */
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(100px);background:var(--ink);color:#fff;padding:11px 22px;border-radius:24px;font-size:13px;font-weight:600;z-index:999;transition:transform .3s cubic-bezier(.34,1.56,.64,1),opacity .3s;opacity:0;pointer-events:none;display:flex;align-items:center;gap:8px;box-shadow:var(--shadow-md)}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+
+/* ── EMPTY ── */
+.empty-state{text-align:center;padding:48px 24px;color:var(--ink3)}
+.empty-icon{font-size:40px;margin-bottom:12px;opacity:.4}
+.empty-msg{font-size:14px}
+
+/* ── MOBILE ── */
+@media(max-width:768px){
+  .sidebar{width:100%;height:auto;position:relative;flex-direction:row;overflow-x:auto}
+  .sidebar-brand{display:none}
+  .nav-section{display:flex;padding:8px;flex-shrink:0}
+  .nav-label{display:none}
+  .nav-item{white-space:nowrap;padding:7px 12px}
+  .sidebar-footer{display:none}
+  .layout{flex-direction:column}
+  .main{margin-left:0}
+  .topbar{padding:0 16px}
+  .content,.dash-content,.clauses-content,.assess-actions,.results-content,.report-content{padding-left:14px;padding-right:14px}
+  .dash-grid{grid-template-columns:1fr}
+  .panel-full{grid-column:auto}
+  .hero-banner{padding:20px}
+  .rating-grid{grid-template-columns:repeat(2,1fr)}
+  .field-row{grid-template-columns:1fr}
+}
+
+/* ── SCROLLBAR ── */
+::-webkit-scrollbar{width:6px;height:6px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--line2);border-radius:3px}
+</style>
+</head>
+<body>
+
+<div class="layout">
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="sidebar-brand">
+    <div class="brand-logo">
+      <div class="brand-icon">✦</div>
+      <div class="brand-name">GapAssess Pro</div>
+    </div>
+    <div class="brand-sub">ISO & Certification Readiness</div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Navigation</div>
+    <a class="nav-item active" id="navHome" onclick="showHome()">
+      <span class="nav-icon">📋</span> Standards
+      <span class="nav-badge" id="navHomeBadge">35</span>
+    </a>
+    <a class="nav-item" id="navDash" onclick="showDashboard()">
+      <span class="nav-icon">📊</span> Dashboard
+    </a>
+    <a class="nav-item" id="navReport" onclick="showReport()">
+      <span class="nav-icon">📄</span> Report & Export
+    </a>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-label">Categories</div>
+    <a class="nav-item" onclick="filterCat('Quality')"><span class="nav-icon" style="color:#2563EB">●</span> Quality</a>
+    <a class="nav-item" onclick="filterCat('Food Safety')"><span class="nav-icon" style="color:#B45309">●</span> Food Safety</a>
+    <a class="nav-item" onclick="filterCat('Sustainability Certification')"><span class="nav-icon" style="color:#065F46">●</span> Sustainability Cert.</a>
+    <a class="nav-item" onclick="filterCat('Information Security')"><span class="nav-icon" style="color:#7C3AED">●</span> Info Security</a>
+    <a class="nav-item" onclick="filterCat('Safety')"><span class="nav-icon" style="color:#DC2626">●</span> Safety</a>
+    <a class="nav-item" onclick="filterCat('Sustainability')"><span class="nav-icon" style="color:#16A34A">●</span> Sustainability</a>
+    <a class="nav-item" onclick="filterCat('Governance')"><span class="nav-icon" style="color:#D97706">●</span> Governance</a>
+    <a class="nav-item" onclick="filterCat('Operations')"><span class="nav-icon" style="color:#0891B2">●</span> Operations</a>
+  </div>
+
+  <div class="sidebar-footer">
+    <p>GapAssess Pro v2.0<br>35 standards · Data saved locally</p>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="page-title" id="pageTitle">All Standards</div>
+      <div class="page-sub" id="pageSub">Select a standard to begin your gap assessment</div>
+    </div>
+    <div class="topbar-right">
+      <button class="tb-chip" onclick="showReport()">📄 Export Report</button>
+      <button class="tb-chip primary" id="saveBtn" onclick="quickSave()">💾 Save</button>
+    </div>
+  </div>
+
+  <!-- HOME SCREEN -->
+  <div class="screen active" id="screenHome">
+    <div class="content">
+      <div class="hero-banner">
+        <div class="hero-title">ISO & Certification Gap Assessment</div>
+        <div class="hero-sub">Assess your organisation's readiness across 35 management standards and certification schemes — from ISO 9001 to FSSC 22000, FSC, and CORSIA. Rate each clause, assign owners, and export a board-ready report.</div>
+        <div class="hero-chips">
+          <span class="hero-chip">✓ 35 Standards</span>
+          <span class="hero-chip">✓ Clause-level guidance</span>
+          <span class="hero-chip">✓ Action tracking</span>
+          <span class="hero-chip">✓ PDF & TXT export</span>
+          <span class="hero-chip">✓ Auto-saved locally</span>
+        </div>
+      </div>
+
+      <div class="stats-grid" id="homeStats"></div>
+
+      <div class="filter-row">
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input class="search-input" type="text" id="searchInput" placeholder="Search standards, categories…" oninput="renderCards()">
+        </div>
+        <div class="filter-pills">
+          <button class="fpill active" data-f="all" onclick="setF(this,'all')">All</button>
+          <button class="fpill" data-f="accredited" onclick="setF(this,'accredited')">Accredited</button>
+          <button class="fpill" data-f="started" onclick="setF(this,'started')">In progress</button>
+          <button class="fpill" data-f="complete" onclick="setF(this,'complete')">Complete</button>
+          <button class="fpill" data-f="new" onclick="setF(this,'new')">New standards</button>
+        </div>
+      </div>
+
+      <div id="cardsContainer"></div>
+    </div>
+  </div>
+
+  <!-- ASSESS SCREEN -->
+  <div class="screen" id="screenAssess">
+    <div class="assess-topbar">
+      <button class="back-btn" onclick="showHome()">← All standards</button>
+      <div class="assess-title" id="assessTitle"></div>
+      <div class="assess-desc" id="assessDesc"></div>
+      <div class="prog-header">
+        <div class="ph-track"><div class="ph-fill" id="phFill" style="width:0%"></div></div>
+        <div class="ph-pct" id="phPct">0%</div>
+        <div class="ph-txt" id="phTxt">0 / 0 clauses</div>
+      </div>
+    </div>
+    <div class="clauses-content" id="clauseList"></div>
+    <div class="assess-actions">
+      <button class="btn-primary" onclick="saveAssess(true)">💾 Save progress</button>
+      <button class="btn-blue" onclick="showResults()">📊 View results</button>
+      <button class="btn-outline" onclick="showReport()">📄 Report</button>
+    </div>
+  </div>
+
+  <!-- DASHBOARD SCREEN -->
+  <div class="screen" id="screenDash">
+    <div class="content" style="padding-bottom:0">
+      <div class="stats-grid" id="dashStats"></div>
+    </div>
+    <div class="dash-content">
+      <div class="dash-grid">
+        <div class="panel">
+          <div class="panel-title"><span>📊</span> Compliance by standard</div>
+          <div id="dashList"></div>
+        </div>
+        <div class="panel">
+          <div class="panel-title"><span>📈</span> Category radar</div>
+          <div class="chart-wrap"><canvas id="radarChart"></canvas></div>
+        </div>
+        <div class="panel panel-full">
+          <div class="panel-title"><span>🎯</span> Action plan tracker</div>
+          <div id="dashActions"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div class="screen" id="screenResults">
+    <div class="assess-topbar">
+      <button class="back-btn" onclick="showHome()">← All standards</button>
+      <div class="assess-title" id="resTitle"></div>
+    </div>
+    <div class="results-content">
+      <div class="compliance-banner" id="compBanner"></div>
+      <div class="panel">
+        <div class="panel-title"><span>📋</span> Clause-by-clause results</div>
+        <div id="resList"></div>
+      </div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-top:16px">
+        <button class="btn-primary" onclick="backToAssess()">✏️ Continue assessing</button>
+        <button class="btn-outline" onclick="showReport()">📄 Full report</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- REPORT SCREEN -->
+  <div class="screen" id="screenReport">
+    <div class="report-content">
+      <div class="report-hero">
+        <div>
+          <div class="report-hero-title">Gap Assessment Report</div>
+          <div class="report-hero-meta" id="repDate"></div>
+        </div>
+        <div class="export-row">
+          <button class="btn-export btn-txt" onclick="exportTXT()">⬇ TXT</button>
+          <button class="btn-export btn-pdf" onclick="exportPDF()">📄 Export PDF</button>
+        </div>
+      </div>
+      <div id="reportContent"></div>
+    </div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /layout -->
+
+<div class="toast" id="toast">✓ Progress saved</div>
+
+<script>
+/* ══════════════════════════════════════════════
+   DATA
+══════════════════════════════════════════════ */
+const CATEGORIES = {
+  'Quality':        {color:'#2563EB', bg:'#EFF6FF', icon:'🏆'},
+  'Food Safety':    {color:'#B45309', bg:'#FFF7ED', icon:'🌾'},
+  'Sustainability Certification':{color:'#065F46',bg:'#ECFDF5',icon:'🌿'},
+  'Information Security':{color:'#7C3AED',bg:'#F5F3FF',icon:'🔒'},
+  'Safety':         {color:'#DC2626', bg:'#FEF2F2', icon:'🦺'},
+  'Sustainability': {color:'#16A34A', bg:'#F0FDF4', icon:'♻️'},
+  'Governance':     {color:'#D97706', bg:'#FFFBEB', icon:'⚖️'},
+  'Operations':     {color:'#0891B2', bg:'#ECFEFF', icon:'⚙️'},
+  'Risk':           {color:'#9D174D', bg:'#FFF1F2', icon:'🎯'},
+  'HR & Knowledge': {color:'#6D28D9', bg:'#F5F3FF', icon:'🧠'},
+  'Technology':     {color:'#6D28D9', bg:'#F5F3FF', icon:'🤖'},
+  'Strategy':       {color:'#0891B2', bg:'#ECFEFF', icon:'🚀'},
+  'Industry':       {color:'#D97706', bg:'#FFFBEB', icon:'🏭'},
+};
+
+const STD = [
+  // QUALITY
+  {id:3,std:"ISO 9001:2015",name:"Quality Management System",desc:"Requirements for a quality management system",acc:true,cat:"Quality",isNew:false},
+  {id:8,std:"ISO 10002:2018",name:"Customer Satisfaction",desc:"Guidance for customer satisfaction and complaints handling",acc:false,cat:"Quality",isNew:false},
+  {id:19,std:"ISO 3834-2:2005",name:"Fusion Welding Quality",desc:"Quality requirements for fusion welding of metallic materials",acc:true,cat:"Quality",isNew:false},
+
+  // FOOD SAFETY (NEW)
+  {id:101,std:"ISO 22000:2018",name:"Food Safety Management",desc:"Requirements for any organization in the food chain",acc:true,cat:"Food Safety",isNew:true},
+  {id:102,std:"FSSC 22000 v6",name:"FSSC 22000 Food Safety",desc:"Food Safety System Certification — GFSI benchmarked scheme",acc:true,cat:"Food Safety",isNew:true},
+  {id:103,std:"BRC/IOP Packaging",name:"BRC Packaging & Materials",desc:"BRC Global Standard for Packaging and Packaging Materials",acc:true,cat:"Food Safety",isNew:true},
+  {id:104,std:"BRC Storage & Dist.",name:"BRC Storage & Distribution",desc:"BRC Global Standard for Storage and Distribution",acc:true,cat:"Food Safety",isNew:true},
+  {id:105,std:"Sedex/SMETA",name:"Sedex SMETA Audit",desc:"Sedex Members Ethical Trade Audit (4-pillar: Labour, H&S, Environment, Ethics)",acc:false,cat:"Food Safety",isNew:true},
+
+  // SUSTAINABILITY CERTIFICATION (NEW)
+  {id:106,std:"FSC CoC",name:"FSC Chain of Custody",desc:"Forest Stewardship Council — Chain of Custody Certification",acc:true,cat:"Sustainability Certification",isNew:true},
+  {id:107,std:"ISCC PLUS",name:"ISCC PLUS",desc:"International Sustainability & Carbon Certification — bio-based/circular materials",acc:true,cat:"Sustainability Certification",isNew:true},
+  {id:108,std:"CORSIA",name:"CORSIA (Aviation Offsets)",desc:"Carbon Offsetting and Reduction Scheme for International Aviation (ICAO)",acc:true,cat:"Sustainability Certification",isNew:true},
+  {id:109,std:"EU ETS / CBAM",name:"EU ETS & CBAM",desc:"EU Emissions Trading System and Carbon Border Adjustment Mechanism compliance",acc:true,cat:"Sustainability Certification",isNew:true},
+
+  // INFORMATION SECURITY
+  {id:9,std:"ISO 27001:2022",name:"Information Security Mgmt",desc:"Information Security Management System (ISMS)",acc:true,cat:"Information Security",isNew:false},
+  {id:2,std:"ISO 27701:2019",name:"Data Privacy (PIMS)",desc:"Privacy Information Management System — extension to ISO 27001",acc:false,cat:"Information Security",isNew:false},
+  {id:20,std:"ISO/IEC 27018:2019",name:"Cloud Personal Data",desc:"Protection of personal data in the cloud",acc:false,cat:"Information Security",isNew:false},
+  {id:24,std:"ISO/IEC 27017:2015",name:"Cloud Security Controls",desc:"Information security controls for cloud services",acc:false,cat:"Information Security",isNew:false},
+
+  // SAFETY
+  {id:11,std:"ISO 45001:2018",name:"Health & Safety Mgmt",desc:"Occupational Health & Safety Management System",acc:true,cat:"Safety",isNew:false},
+  {id:16,std:"ISO 39001:2012",name:"Road Safety Management",desc:"Road Traffic Safety Management System",acc:true,cat:"Safety",isNew:false},
+
+  // SUSTAINABILITY
+  {id:15,std:"ISO 14001:2016",name:"Environmental Management",desc:"Environmental Management System (EMS)",acc:true,cat:"Sustainability",isNew:false},
+  {id:17,std:"ISO 50001:2018",name:"Energy Management",desc:"Energy Management System (EnMS)",acc:true,cat:"Sustainability",isNew:false},
+  {id:21,std:"ISO 14064",name:"GHG Reporting",desc:"Greenhouse Gas Quantification, Monitoring, Reporting & Verification",acc:true,cat:"Sustainability",isNew:false},
+  {id:18,std:"ISO 20400:2017",name:"Sustainable Procurement",desc:"Guidance for Sustainable Procurement",acc:false,cat:"Sustainability",isNew:false},
+  {id:7,std:"ISO 26000:2010",name:"Social Responsibility",desc:"Guidance on Social Responsibility (SR)",acc:false,cat:"Sustainability",isNew:false},
+
+  // GOVERNANCE
+  {id:5,std:"ISO 37301:2021",name:"Compliance Management",desc:"Compliance Management System requirements",acc:true,cat:"Governance",isNew:false},
+  {id:23,std:"ISO 37001:2016",name:"Anti-Bribery Mgmt",desc:"Anti-Bribery Management System (ABMS)",acc:true,cat:"Governance",isNew:false},
+  {id:25,std:"ISO 44001:2017",name:"Collaborative Business",desc:"Collaborative business relationship management systems",acc:false,cat:"Governance",isNew:false},
+
+  // OPERATIONS
+  {id:12,std:"ISO 22301:2019",name:"Business Continuity",desc:"Business Continuity Management System (BCMS)",acc:true,cat:"Operations",isNew:false},
+  {id:13,std:"ISO 20000-1:2018",name:"IT Service Management",desc:"IT Service Management System (ITSM)",acc:true,cat:"Operations",isNew:false},
+  {id:14,std:"ISO 55001:2024",name:"Asset Management",desc:"Asset Management System requirements",acc:true,cat:"Operations",isNew:false},
+  {id:1,std:"ISO 2320:2018",name:"Incident Management",desc:"Guidelines for incident management",acc:false,cat:"Operations",isNew:false},
+
+  // RISK
+  {id:6,std:"ISO 31000:2018",name:"Risk Management",desc:"Guidelines for Risk Management",acc:false,cat:"Risk",isNew:false},
+
+  // HR & KNOWLEDGE
+  {id:10,std:"ISO 30401:2018",name:"Knowledge Management",desc:"Knowledge Management Systems",acc:false,cat:"HR & Knowledge",isNew:false},
+  {id:27,std:"ISO 30401:2018",name:"HR Management",desc:"Human Resource Management Systems",acc:false,cat:"HR & Knowledge",isNew:false},
+
+  // TECHNOLOGY
+  {id:26,std:"ISO 42001:2023",name:"AI Management System",desc:"Artificial Intelligence Management System (AIMS)",acc:false,cat:"Technology",isNew:false},
+
+  // STRATEGY
+  {id:4,std:"ISO 56004:2019",name:"Innovation Management",desc:"Guidelines for Innovation Management Assessment",acc:false,cat:"Strategy",isNew:false},
+
+  // INDUSTRY
+  {id:22,std:"ISO 29001:2020",name:"Oil & Gas Quality",desc:"Quality Management for petroleum, petrochemical and natural gas industries",acc:false,cat:"Industry",isNew:false},
+];
+
+/* ── CLAUSE LIBRARY ── */
+const G = {
+  "4.1":"Identify internal and external issues that affect the system's ability to achieve intended outcomes.",
+  "4.2":"Identify interested parties and determine relevant requirements and expectations.",
+  "4.3":"Define the scope — what is included and explicitly excluded from the system.",
+  "4.4":"Establish, implement, maintain, and continually improve the management system and its processes.",
+  "5.1":"Top management must actively demonstrate leadership — not merely delegate responsibility.",
+  "5.2":"Define and communicate a policy that is appropriate to the organisation's purpose.",
+  "5.3":"Assign, communicate, and document roles, responsibilities, and authorities formally.",
+  "6.1":"Determine and address risks and opportunities that could affect achieving intended outcomes.",
+  "6.2":"Establish measurable objectives, plan how to achieve them, and track results.",
+  "7.1":"Provide people, infrastructure, environment, and knowledge resources needed for the system.",
+  "7.2":"Ensure personnel are competent; document education, training, or experience evidence.",
+  "7.3":"Ensure people are aware of the policy, their contribution, and nonconformity consequences.",
+  "7.4":"Determine what, when, with whom, and how to communicate relevant information.",
+  "7.5":"Maintain documented information required by the standard and by the organisation.",
+  "8.1":"Plan, implement, control, and review processes to meet requirements.",
+  "9.1":"Monitor, measure, analyse, and evaluate performance — determine what, how, and when.",
+  "9.2":"Conduct planned internal audits to confirm conformance and effective implementation.",
+  "9.3":"Top management reviews the system at planned intervals for suitability, adequacy, and effectiveness.",
+  "10.1":"Identify and implement actions for improvement and continual enhancement.",
+  "10.2":"React to nonconformities, take corrective action, and verify effectiveness.",
+};
+
+const HLS = [
+  {n:"4.1",t:"Context — Internal & external issues",g:G["4.1"]},
+  {n:"4.2",t:"Context — Interested parties",g:G["4.2"]},
+  {n:"4.3",t:"Context — Scope",g:G["4.3"]},
+  {n:"4.4",t:"Context — Management system & processes",g:G["4.4"]},
+  {n:"5.1",t:"Leadership — Top management commitment",g:G["5.1"]},
+  {n:"5.2",t:"Leadership — Policy",g:G["5.2"]},
+  {n:"5.3",t:"Leadership — Roles & responsibilities",g:G["5.3"]},
+  {n:"6.1",t:"Planning — Risks & opportunities",g:G["6.1"]},
+  {n:"6.2",t:"Planning — Objectives & plans",g:G["6.2"]},
+  {n:"7.1",t:"Support — Resources",g:G["7.1"]},
+  {n:"7.2",t:"Support — Competence",g:G["7.2"]},
+  {n:"7.3",t:"Support — Awareness",g:G["7.3"]},
+  {n:"7.4",t:"Support — Communication",g:G["7.4"]},
+  {n:"7.5",t:"Support — Documented information",g:G["7.5"]},
+  {n:"8.1",t:"Operation — Operational planning & control",g:G["8.1"]},
+  {n:"9.1",t:"Performance evaluation — Monitoring & measurement",g:G["9.1"]},
+  {n:"9.2",t:"Performance evaluation — Internal audit",g:G["9.2"]},
+  {n:"9.3",t:"Performance evaluation — Management review",g:G["9.3"]},
+  {n:"10.1",t:"Improvement — General",g:G["10.1"]},
+  {n:"10.2",t:"Improvement — Nonconformity & corrective action",g:G["10.2"]},
+];
+
+const CMAP = {
+  3:[  // ISO 9001
+    {n:"4.1",t:"Context — Internal & external issues",g:G["4.1"]},
+    {n:"4.2",t:"Context — Interested parties & their requirements",g:G["4.2"]},
+    {n:"4.3",t:"Context — Scope of QMS",g:G["4.3"]},
+    {n:"4.4",t:"Context — QMS and its processes",g:G["4.4"]},
+    {n:"5.1",t:"Leadership — Quality commitment",g:G["5.1"]},
+    {n:"5.2",t:"Leadership — Quality policy",g:G["5.2"]},
+    {n:"5.3",t:"Leadership — Roles & responsibilities",g:G["5.3"]},
+    {n:"6.1",t:"Planning — Risk-based thinking",g:G["6.1"]},
+    {n:"6.2",t:"Planning — Quality objectives",g:G["6.2"]},
+    {n:"7.1",t:"Support — Resources (people, infrastructure, environment, knowledge)",g:G["7.1"]},
+    {n:"7.2",t:"Support — Competence",g:G["7.2"]},
+    {n:"7.5",t:"Support — Documented information",g:G["7.5"]},
+    {n:"8.1",t:"Operation — Operational planning & control",g:G["8.1"]},
+    {n:"8.2",t:"Operation — Requirements for products & services","g":"Determine, review, and communicate requirements for products and services — including customer requirements and legal obligations."},
+    {n:"8.3",t:"Operation — Design & development","g":"Plan and control design and development — inputs, outputs, reviews, verification, and management of changes."},
+    {n:"8.4",t:"Operation — Externally provided processes, products & services","g":"Determine controls for external providers. Communicate requirements and evaluate their performance."},
+    {n:"8.5",t:"Operation — Production & service provision","g":"Control production and service provision — traceability, preservation, post-delivery activities, and control of changes."},
+    {n:"9.1",t:"Performance — Monitoring, measurement & customer satisfaction",g:G["9.1"]},
+    {n:"9.2",t:"Performance — Internal audit",g:G["9.2"]},
+    {n:"9.3",t:"Performance — Management review",g:G["9.3"]},
+    {n:"10.2",t:"Improvement — Nonconformity & corrective action",g:G["10.2"]},
+    {n:"10.3",t:"Improvement — Continual improvement","g":"Continually improve QMS suitability, adequacy, and effectiveness using results of analysis and management review outputs."},
+  ],
+  9:[  // ISO 27001
+    {n:"4.1",t:"Context — ISMS context",g:G["4.1"]},
+    {n:"4.2",t:"Context — Interested parties",g:G["4.2"]},
+    {n:"4.3",t:"Context — ISMS scope",g:G["4.3"]},
+    {n:"5.1",t:"Leadership — Information security commitment",g:G["5.1"]},
+    {n:"5.2",t:"Leadership — Information security policy",g:G["5.2"]},
+    {n:"5.3",t:"Leadership — Roles & responsibilities",g:G["5.3"]},
+    {n:"6.1",t:"Planning — Information security risk assessment","g":"Define and apply a risk assessment process. Identify, analyse, and evaluate information security risks. Document results."},
+    {n:"6.1.3",t:"Planning — Risk treatment & Statement of Applicability","g":"Select Annex A controls, produce a Statement of Applicability (SoA), develop a risk treatment plan, and obtain owner approval."},
+    {n:"6.2",t:"Planning — Information security objectives",g:G["6.2"]},
+    {n:"7.1",t:"Support — Resources",g:G["7.1"]},
+    {n:"7.2",t:"Support — Competence",g:G["7.2"]},
+    {n:"7.5",t:"Support — Documented information",g:G["7.5"]},
+    {n:"8.2",t:"Operation — Risk assessment","g":"Perform information security risk assessments at planned intervals or when significant changes occur. Retain documented results."},
+    {n:"8.3",t:"Operation — Risk treatment","g":"Implement the risk treatment plan. Retain documented results of the risk treatment activities."},
+    {n:"9.1",t:"Performance — Monitoring & measurement",g:G["9.1"]},
+    {n:"9.2",t:"Performance — Internal audit",g:G["9.2"]},
+    {n:"9.3",t:"Performance — Management review",g:G["9.3"]},
+    {n:"10.2",t:"Improvement — Nonconformity & corrective action",g:G["10.2"]},
+    {n:"A.5",t:"Annex A — Information security policies","g":"Policies for information security shall be defined, approved, published, communicated, and reviewed at planned intervals."},
+    {n:"A.6",t:"Annex A — Roles, responsibilities & contacts","g":"Define information security responsibilities, maintain contacts with authorities and interest groups, and address information security in project management."},
+    {n:"A.8",t:"Annex A — Asset management","g":"Identify assets, classify them by their importance, and manage acceptable use. Ensure return of assets on change or termination."},
+    {n:"A.9",t:"Annex A — Access control","g":"Implement access control policy, user access management, user responsibilities, and system and application access control."},
+    {n:"A.12",t:"Annex A — Operations security","g":"Document operating procedures, manage capacity, protect against malware, log and monitor events, manage technical vulnerabilities."},
+    {n:"A.18",t:"Annex A — Compliance","g":"Identify legal, regulatory, and contractual requirements. Conduct information security reviews and technical compliance checks."},
+  ],
+  11:[ // ISO 45001
+    {n:"4.1",t:"Context — OH&S context",g:G["4.1"]},
+    {n:"4.2",t:"Context — Interested parties (including workers)",g:G["4.2"]},
+    {n:"4.3",t:"Context — OHSMS scope",g:G["4.3"]},
+    {n:"5.1",t:"Leadership — OH&S commitment",g:G["5.1"]},
+    {n:"5.2",t:"Leadership — OH&S policy",g:G["5.2"]},
+    {n:"5.3",t:"Leadership — Roles & responsibilities",g:G["5.3"]},
+    {n:"5.4",t:"Leadership — Worker consultation & participation","g":"Establish processes for consultation and active participation of workers and workers' representatives in the OHSMS at all applicable levels."},
+    {n:"6.1",t:"Planning — Hazard identification & risk assessment","g":"Establish proactive processes to identify hazards, assess OH&S risks and opportunities, and determine legal requirements. Document and update."},
+    {n:"6.2",t:"Planning — OH&S objectives",g:G["6.2"]},
+    {n:"7.1",t:"Support — Resources",g:G["7.1"]},
+    {n:"7.2",t:"Support — Competence",g:G["7.2"]},
+    {n:"8.1",t:"Operation — Operational planning & control","g":"Establish, implement, and maintain processes to meet OH&S requirements. Manage change, eliminate hazards, and reduce OH&S risks."},
+    {n:"8.2",t:"Operation — Emergency preparedness & response","g":"Establish processes to prepare for and respond to potential emergency situations. Test periodically where practicable. Review after incidents."},
+    {n:"9.1",t:"Performance — Monitoring & measurement",g:G["9.1"]},
+    {n:"9.1.2",t:"Performance — Compliance evaluation","g":"Establish processes to evaluate compliance with legal requirements and other requirements. Retain documented evidence of results."},
+    {n:"9.2",t:"Performance — Internal audit",g:G["9.2"]},
+    {n:"9.3",t:"Performance — Management review",g:G["9.3"]},
+    {n:"10.2",t:"Improvement — Incident, nonconformity & corrective action","g":"Establish processes for reporting, investigating, and taking action on incidents and nonconformities. Assess related OH&S risks."},
+  ],
+  15:[ // ISO 14001
+    {n:"4.1",t:"Context — Environmental context",g:G["4.1"]},
+    {n:"4.2",t:"Context — Interested parties",g:G["4.2"]},
+    {n:"4.3",t:"Context — EMS scope",g:G["4.3"]},
+    {n:"6.1",t:"Planning — Environmental aspects & compliance obligations","g":"Identify environmental aspects and associated impacts (including life cycle perspective). Determine significant environmental aspects. Identify compliance obligations."},
+    {n:"6.2",t:"Planning — Environmental objectives",g:G["6.2"]},
+    {n:"7.4",t:"Support — Communication (internal & external)",g:G["7.4"]},
+    {n:"8.1",t:"Operation — Operational control (life cycle perspective)","g":"Establish controls for significant environmental aspects. Include a life cycle perspective in process design and product/service delivery."},
+    {n:"8.2",t:"Operation — Emergency preparedness & response","g":"Establish processes for emergency situations. Test periodically where practicable. Review and revise after incidents or tests."},
+    {n:"9.1",t:"Performance — Monitoring, measurement & compliance evaluation",g:G["9.1"]},
+    {n:"9.2",t:"Performance — Internal audit",g:G["9.2"]},
+    {n:"9.3",t:"Performance — Management review",g:G["9.3"]},
+    {n:"10.3",t:"Improvement — Continual improvement","g":"Continually improve the suitability, adequacy, and effectiveness of the EMS to enhance environmental performance."},
+  ],
+  // ISO 22000
+  101:[
+    {n:"4.1",t:"Context — Food safety context & FSMS scope",g:G["4.1"]},
+    {n:"4.2",t:"Context — Interested parties",g:G["4.2"]},
+    {n:"5.1",t:"Leadership — Food safety commitment & culture",g:G["5.1"]},
+    {n:"5.2",t:"Leadership — Food safety policy",g:G["5.2"]},
+    {n:"6.1",t:"Planning — FSMS risks & opportunities",g:G["6.1"]},
+    {n:"7.1",t:"Support — Infrastructure, work environment & expertise",g:G["7.1"]},
+    {n:"7.4",t:"Support — Communication (internal & external including supply chain)",g:G["7.4"]},
+    {n:"8.1",t:"Operation — Prerequisite Programmes (PRPs)","g":"Establish, implement, maintain, and review PRPs for hygiene, pest control, cleaning, cross-contamination prevention, and facility design."},
+    {n:"8.2",t:"Operation — Traceability system","g":"Identify material and product lots through the food chain. Ensure traceability is sufficient to facilitate withdrawal/recall if needed."},
+    {n:"8.3",t:"Operation — Emergency preparedness & crisis management","g":"Establish and maintain procedures for situations with potential impact on food safety. Include communication protocols."},
+    {n:"8.4",t:"Operation — Hazard control (HACCP principles)","g":"Conduct hazard analysis, determine control measures, establish CCPs, Critical Limits, monitoring procedures, and corrective actions."},
+    {n:"8.5",t:"Operation — Hazard Analysis & HACCP plan","g":"Identify food safety hazards (biological, chemical, physical, allergenic), assess likelihood and severity, and determine significance."},
+    {n:"8.6",t:"Operation — Updating preliminary information & HACCP","g":"Update flow diagrams, hazard analysis, and HACCP plan as processes, products, or information changes."},
+    {n:"8.8",t:"Operation — Verification & validation","g":"Validate control measure combinations. Verify FSMS through monitoring of CCPs, PRPs, and food safety objectives."},
+    {n:"8.9",t:"Operation — Nonconformity & corrections (product withdrawal/recall)","g":"Define procedures for handling potentially unsafe products. Establish and document product withdrawal and recall procedures."},
+    {n:"9.1",t:"Performance — Monitoring, measurement & FSMS analysis",g:G["9.1"]},
+    {n:"9.2",t:"Performance — Internal audit",g:G["9.2"]},
+    {n:"9.3",t:"Performance — Management review",g:G["9.3"]},
+    {n:"10.1",t:"Improvement — Nonconformity & corrective action",g:G["10.1"]},
+    {n:"10.3",t:"Improvement — FSMS update & continual improvement","g":"Continually update and improve the FSMS using results of verification, audits, and management reviews."},
+  ],
+  // FSSC 22000
+  102:[
+    {n:"ISO 22000",t:"ISO 22000:2018 base requirements","g":"All elements of ISO 22000:2018 must be implemented in full as the foundation of FSSC 22000."},
+    {n:"ISO/TS PRPs",t:"Sector-specific Prerequisite Programmes","g":"Implement ISO/TS 22002-1 (food manufacturing) or other applicable sector TS for PRP requirements."},
+    {n:"Add.1",t:"Additional requirement — Service management","g":"Control and manage services (utilities, maintenance, calibration) that impact food safety through defined procedures and approved supplier lists."},
+    {n:"Add.2",t:"Additional requirement — Product labelling","g":"Ensure product labels comply with applicable regulatory requirements for the country of manufacture and destination markets."},
+    {n:"Add.3",t:"Additional requirement — Food defence","g":"Conduct a food defence threat assessment. Implement site security measures and document a food defence plan."},
+    {n:"Add.4",t:"Additional requirement — Food fraud prevention","g":"Conduct a food fraud vulnerability assessment. Implement a food fraud mitigation plan addressing ingredients, processes, and supply chain."},
+    {n:"Add.5",t:"Additional requirement — Allergen management","g":"Establish an allergen management programme covering supplier approval, cross-contact prevention, labelling, cleaning validation, and consumer communication."},
+    {n:"Add.6",t:"Additional requirement — Environmental monitoring","g":"Implement an environmental monitoring programme (EMP) for relevant pathogens where applicable (e.g. Listeria, Salmonella)."},
+    {n:"Add.7",t:"Additional requirement — Quality culture","g":"Demonstrate active food safety culture. Provide evidence of management commitment, communication, training, and employee engagement programmes."},
+    {n:"Add.8",t:"Additional requirement — Transport & delivery","g":"Control food safety conditions during transport and delivery — temperature, hygiene, vehicle acceptance, and documentation."},
+    {n:"Cert",t:"FSSC certification scheme requirements","g":"Comply with FSSC 22000 Scheme document requirements: use of logo, communication of certification status, and CB notification obligations."},
+  ],
+  // BRC Packaging
+  103:[
+    {n:"1",t:"Senior management commitment & continual improvement","g":"Senior management must demonstrate commitment. Establish a food safety and quality culture and review KPIs regularly."},
+    {n:"2",t:"Hazard and risk management system","g":"Implement a documented system covering safety hazards (chemical, physical, biological, allergenic, counterfeit) relevant to packaging materials."},
+    {n:"3",t:"Food safety & quality management system","g":"Maintain a documented FSMS/QMS including document control, records, internal audits, supplier approval, and corrective actions."},
+    {n:"4",t:"Site standards — Layout, product flow & segregation","g":"Design facility layout to prevent contamination. Control product flow, segregate materials, and manage waste effectively."},
+    {n:"5",t:"Product & process control","g":"Establish product specifications, process controls, artwork management, weight/quantity control, and calibration systems."},
+    {n:"6",t:"Personnel — Hygiene, training & medical screening","g":"Implement hygiene standards, training programmes, medical screening, and PPE requirements for all personnel and visitors."},
+    {n:"7",t:"Controlled substances & foreign body detection","g":"Identify and control use of controlled substances. Implement foreign body detection (metal detection, X-ray) where applicable."},
+    {n:"8",t:"Complaints & incident management","g":"Establish processes for handling customer complaints, product incidents, product withdrawals, and recalls."},
+    {n:"9",t:"Traceability","g":"Maintain traceability for all materials through the supply chain and production process. Conduct regular traceability exercises."},
+    {n:"10",t:"Sustainability & food loss","g":"Implement initiatives to reduce food loss and waste. Document sustainability actions and targets aligned with the BRC Sustainability Charter."},
+  ],
+  // BRC Storage
+  104:[
+    {n:"1",t:"Senior management commitment","g":"Senior management commits to a food safety and quality culture. Review and approve food safety policy and objectives."},
+    {n:"2",t:"Food safety plan (HACCP-based)","g":"Implement a documented HACCP-based food safety plan covering all stored and distributed products."},
+    {n:"3",t:"Food safety & quality management system","g":"Maintain documented procedures for document control, internal audit, supplier approval, complaints, and corrective actions."},
+    {n:"4",t:"Site standards — Facility & temperature control","g":"Maintain facility in good repair. Control temperature-sensitive storage environments with monitoring and alarms."},
+    {n:"5",t:"Vehicle operations & transport management","g":"Control vehicle hygiene, temperature control, loading/unloading procedures, and driver training."},
+    {n:"6",t:"Personnel hygiene & training","g":"Implement hygiene standards, induction and ongoing training, medical screening, and appropriate PPE."},
+    {n:"7",t:"High-risk, high-care & ambient high-care","g":"Where applicable, implement additional controls for high-risk and high-care environments including zoning and validation."},
+    {n:"8",t:"Traded goods","g":"Apply appropriate controls for goods bought and sold without processing — including supplier approval and labelling requirements."},
+    {n:"9",t:"Regulatory compliance","g":"Identify and comply with all applicable legislative requirements for stored/distributed products in markets served."},
+  ],
+  // Sedex
+  105:[
+    {n:"L1",t:"Pillar 1: Labour — Employment relationship","g":"Workers must have a freely chosen employment. No forced, bonded, or trafficked labour. Provide written employment contracts."},
+    {n:"L2",t:"Pillar 1: Labour — Freedom of association","g":"Respect workers' rights to join or form trade unions and to bargain collectively, in accordance with local laws."},
+    {n:"L3",t:"Pillar 1: Labour — Health & safety in labour","g":"Provide a safe and hygienic working environment. Address key risks: fire safety, machinery, chemical handling, PPE."},
+    {n:"L4",t:"Pillar 1: Labour — Child & young worker labour","g":"No child labour. Young workers (under 18) shall not work night shifts or in hazardous conditions. Verify ages at hiring."},
+    {n:"L5",t:"Pillar 1: Labour — Wages & benefits","g":"Pay at least legal minimum wages on time. Overtime pay complies with law. Provide legally mandated benefits."},
+    {n:"L6",t:"Pillar 1: Labour — Working hours","g":"Working hours comply with national laws. Overtime is not excessive. Workers have at least one day off in seven."},
+    {n:"L7",t:"Pillar 1: Labour — Discrimination & harassment","g":"No discrimination based on gender, race, age, religion, disability, nationality, etc. Zero tolerance for harassment."},
+    {n:"HS1",t:"Pillar 2: Health & Safety — Management system","g":"Appoint a responsible H&S person. Conduct risk assessments. Provide training and appropriate PPE."},
+    {n:"HS2",t:"Pillar 2: Health & Safety — Emergency preparedness","g":"Have documented emergency procedures, fire safety systems, evacuation plans, and conduct regular drills."},
+    {n:"HS3",t:"Pillar 2: Health & Safety — Incident recording","g":"Record and investigate accidents and near-misses. Report to relevant authorities where legally required."},
+    {n:"E1",t:"Pillar 3: Environment — Environmental management","g":"Identify environmental impacts. Comply with environmental legislation. Set targets for waste, water, and energy reduction."},
+    {n:"E2",t:"Pillar 3: Environment — Waste & emissions","g":"Manage waste disposal lawfully. Control air emissions, wastewater discharge, and hazardous substances."},
+    {n:"ET1",t:"Pillar 4: Business Ethics — Anti-bribery & corruption","g":"Prohibit bribery, corruption, and facilitation payments. Implement anti-corruption policy and training."},
+    {n:"ET2",t:"Pillar 4: Business Ethics — Financial integrity","g":"Maintain accurate business records. No falsification of audit records or worker interviews."},
+  ],
+  // FSC
+  106:[
+    {n:"CoC.1",t:"Chain of custody — Product group definition","g":"Define product groups clearly for each certified product. Maintain an up-to-date product group list reviewed annually."},
+    {n:"CoC.2",t:"Chain of custody — Material inputs","g":"Ensure input materials are sourced only from FSC-certified suppliers (or controlled wood where applicable). Verify supplier certificates."},
+    {n:"CoC.3",t:"Chain of custody — Transfer of custody","g":"Manage material receiving, processing, and dispatch to ensure FSC material is identifiable and not mixed with non-certified material."},
+    {n:"CoC.4",t:"Chain of custody — Job order control","g":"Use job order or batch control to track FSC material through production. Maintain records of inputs, outputs, and yield."},
+    {n:"CoC.5",t:"Chain of custody — Product labelling","g":"Apply FSC trademarks in accordance with FSC Trademark Standard. Do not use FSC logo on products that do not meet the standard."},
+    {n:"CoC.6",t:"Chain of custody — Outsourcing","g":"If outsourcing production, ensure subcontractors are FSC-certified or the material remains under the certificate holder's control."},
+    {n:"CoC.7",t:"Chain of custody — Sales documentation","g":"Include FSC claim on invoices and delivery notes. Maintain records to demonstrate claims made to customers."},
+    {n:"CoC.8",t:"Controlled wood — Due diligence (if applicable)","g":"If using controlled wood, implement a due diligence system to assess and mitigate risk of sourcing from unacceptable sources."},
+    {n:"CoC.9",t:"Management system — Documented procedures","g":"Maintain documented procedures for all CoC elements. Include document control, training, and internal audit processes."},
+    {n:"CoC.10",t:"Management system — Training & awareness","g":"Train all staff involved in CoC on their roles, FSC requirements, and the consequences of noncompliance."},
+    {n:"CoC.11",t:"Management system — Internal audits","g":"Conduct internal audits at least annually. Audit against all CoC requirements and take corrective actions for findings."},
+  ],
+  // ISCC PLUS
+  107:[
+    {n:"IS.1",t:"System description & mass balance","g":"Define and document the system boundary. Implement and maintain a mass balance bookkeeping system for certified sustainable materials."},
+    {n:"IS.2",t:"Sustainability requirements — GHG calculation","g":"Calculate greenhouse gas emissions savings in accordance with the applicable methodology. Achieve minimum savings threshold."},
+    {n:"IS.3",t:"Sustainability requirements — Land criteria","g":"Biomass/bio-based materials shall not be produced on land with high biodiversity value or high carbon stock converted after Jan 2008."},
+    {n:"IS.4",t:"Social sustainability","g":"Comply with relevant ILO core labour conventions. Ensure no child labour, forced labour, or discrimination in the supply chain."},
+    {n:"IS.5",t:"Chain of custody — Physical segregation or mass balance","g":"Implement either physical segregation or mass balance approach consistently. Document the approach chosen and maintain audit trail."},
+    {n:"IS.6",t:"Documentation & record keeping","g":"Maintain records of all sustainable material transactions for at least 5 years. Records must be traceable and auditable."},
+    {n:"IS.7",t:"Supply chain due diligence","g":"Assess and verify claims from suppliers. Maintain up-to-date supplier certificate database. Handle non-compliance in supply chain."},
+    {n:"IS.8",t:"Internal audit & continuous improvement","g":"Conduct internal audits of the ISCC system annually. Address findings and demonstrate continual improvement."},
+    {n:"IS.9",t:"Complaint & fraud prevention","g":"Implement measures to prevent fraud and document complaint handling procedures related to ISCC certification claims."},
+  ],
+  // CORSIA
+  108:[
+    {n:"COR.1",t:"CORSIA eligibility — Operator registration","g":"Register as a CORSIA-covered aircraft operator with relevant civil aviation authority (CAA). Maintain current registration status."},
+    {n:"COR.2",t:"Emissions monitoring plan","g":"Develop and submit a CORSIA Emissions Monitoring Plan (EMP) approved by the responsible authority before monitoring begins."},
+    {n:"COR.3",t:"CO2 emissions monitoring","g":"Monitor CO2 emissions from covered international flights using approved fuel use method. Maintain data quality and completeness."},
+    {n:"COR.4",t:"Annual emissions reporting","g":"Submit verified annual emissions report to responsible authority by 31 March each year covering the previous calendar year."},
+    {n:"COR.5",t:"Third-party verification","g":"Engage an accredited verification body to verify emissions reports. Address verification findings before submission."},
+    {n:"COR.6",t:"Offsetting obligations (Phase 2)","g":"Determine offsetting requirement based on sector growth. Purchase and cancel eligible carbon units from CORSIA-approved schemes."},
+    {n:"COR.7",t:"CORSIA Eligible Fuels (SAF)","g":"If using Sustainable Aviation Fuel (SAF) for CORSIA, ensure it meets eligibility criteria and obtain CORSIA Eligible Fuel documentation."},
+    {n:"COR.8",t:"Record keeping & access","g":"Retain all CORSIA-related records (monitoring, reporting, verification, offsetting) for a minimum of 10 years."},
+  ],
+  // EU ETS / CBAM
+  109:[
+    {n:"ETS.1",t:"EU ETS — Installation/aircraft operator permit","g":"Hold a valid Greenhouse Gas Emissions Permit (installations) or be registered as an aircraft operator under EU ETS."},
+    {n:"ETS.2",t:"EU ETS — Monitoring Plan","g":"Develop, implement, and maintain an approved Monitoring Plan that documents methodology for emissions monitoring and reporting."},
+    {n:"ETS.3",t:"EU ETS — Annual emissions monitoring","g":"Monitor and record CO2 (and N2O/PFCs where applicable) using the approved Monitoring Plan. Ensure data quality."},
+    {n:"ETS.4",t:"EU ETS — Verified annual emissions report","g":"Submit a verified annual emissions report (AER) to competent authority by 31 March. Report must be verified by an accredited verifier."},
+    {n:"ETS.5",t:"EU ETS — Surrendering allowances","g":"Surrender a number of EU ETS allowances (EUAs) equal to total verified emissions by 30 April each year."},
+    {n:"ETS.6",t:"EU ETS — Improvement report","g":"Where required by competent authority, submit improvement reports addressing recommendations from verification."},
+    {n:"CBAM.1",t:"CBAM — Declarant registration","g":"Register as an authorised CBAM declarant via the national competent authority if importing CBAM goods into the EU."},
+    {n:"CBAM.2",t:"CBAM — Quarterly reporting","g":"Submit quarterly CBAM reports covering quantity, country of origin, and embedded emissions of imported CBAM goods."},
+    {n:"CBAM.3",t:"CBAM — Embedded emissions calculation","g":"Calculate embedded (direct and indirect) greenhouse gas emissions in CBAM goods using approved methodology."},
+    {n:"CBAM.4",t:"CBAM — Purchase & surrender of CBAM certificates","g":"Purchase and surrender CBAM certificates corresponding to the embedded emissions in imported goods."},
+    {n:"CBAM.5",t:"CBAM — Supply chain due diligence","g":"Verify and document carbon prices already paid in countries of origin to avoid double counting."},
+  ],
+};
+
+// Default to HLS for unlisted standards
+function getClauses(id){return CMAP[id]||HLS;}
+
+/* ── STATE ── */
+let appData = {};
+let curStd = null;
+let curFilter = 'all';
+let curCatFilter = null;
+let radarChart = null;
+
+function loadData(){try{const d=localStorage.getItem('gapAssessProV3');if(d)appData=JSON.parse(d);}catch(e){}}
+function saveData(){try{localStorage.setItem('gapAssessProV3',JSON.stringify(appData));}catch(e){}}
+loadData();
+
+/* ── HELPERS ── */
+function getProgress(id){
+  const d=appData[id]||{};const cl=getClauses(id);
+  const ans=cl.filter((_,i)=>d[i]?.r!==undefined).length;
+  return{ans,tot:cl.length,pct:cl.length?Math.round(ans/cl.length*100):0};
+}
+function getScore(id){
+  const d=appData[id]||{};const cl=getClauses(id);
+  const ans=cl.map((_,i)=>d[i]).filter(x=>x?.r!==undefined);
+  if(!ans.length)return null;
+  return Math.round(ans.reduce((a,x)=>a+x.r,0)/ans.length/3*100);
+}
+function scoreClass(s){if(s===null)return'score-b';if(s>=75)return'score-g';if(s>=50)return'score-b';if(s>=25)return'score-a';return'score-r';}
+function fillClass(s){if(s===null)return'fill-b';if(s>=75)return'fill-g';if(s>=50)return'fill-b';if(s>=25)return'fill-a';return'fill-r';}
+function ragLabel(s){if(s===null)return'—';if(s>=75)return'✅ Good';if(s>=50)return'🔵 Adequate';if(s>=25)return'⚠️ Needs work';return'🔴 Critical gap';}
+function catInfo(c){return CATEGORIES[c]||{color:'#6B7280',bg:'#F9FAFB',icon:'📋'};}
+
+/* ── HOME ── */
+function renderHomeStats(){
+  const tot=STD.length;
+  const started=STD.filter(s=>getProgress(s.id).ans>0).length;
+  const complete=STD.filter(s=>{const p=getProgress(s.id);return p.ans===p.tot&&p.tot>0}).length;
+  const scores=STD.map(s=>getScore(s.id)).filter(x=>x!==null);
+  const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  document.getElementById('homeStats').innerHTML=`
+    <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-num">${tot}</div><div class="stat-lbl">Total standards</div></div>
+    <div class="stat-card stat-accent-blue"><div class="stat-icon">🔄</div><div class="stat-num">${started}</div><div class="stat-lbl">In progress</div></div>
+    <div class="stat-card stat-accent-green"><div class="stat-icon">✅</div><div class="stat-num">${complete}</div><div class="stat-lbl">Assessments complete</div></div>
+    <div class="stat-card ${avg>=75?'stat-accent-green':avg>=50?'stat-accent-blue':avg>0?'stat-accent-amber':''}">
+      <div class="stat-icon">📈</div><div class="stat-num">${avg?avg+'%':'—'}</div><div class="stat-lbl">Avg compliance score</div></div>
+    <div class="stat-card stat-accent-red"><div class="stat-icon">⚠️</div><div class="stat-num">${tot-started}</div><div class="stat-lbl">Not yet started</div></div>
+  `;
+}
+
+function setF(el,f){
+  curFilter=f;curCatFilter=null;
+  document.querySelectorAll('[data-f]').forEach(b=>b.classList.toggle('active',b.dataset.f===f));
+  renderCards();
+}
+
+function filterCat(cat){
+  curCatFilter=cat;curFilter='all';
+  document.querySelectorAll('[data-f]').forEach(b=>b.classList.remove('active'));
+  renderCards();
+  showHome();
+}
+
+function renderCards(){
+  const q=(document.getElementById('searchInput').value||'').toLowerCase();
+  let list=[...STD];
+  if(curFilter==='accredited')list=list.filter(s=>s.acc);
+  if(curFilter==='new')list=list.filter(s=>s.isNew);
+  if(curFilter==='started')list=list.filter(s=>{const p=getProgress(s.id);return p.ans>0&&p.ans<p.tot;});
+  if(curFilter==='complete')list=list.filter(s=>{const p=getProgress(s.id);return p.ans===p.tot&&p.tot>0;});
+  if(curCatFilter)list=list.filter(s=>s.cat===curCatFilter);
+  if(q)list=list.filter(s=>s.name.toLowerCase().includes(q)||s.std.toLowerCase().includes(q)||s.cat.toLowerCase().includes(q));
+
+  // Group by category
+  const cats={};
+  list.forEach(s=>{if(!cats[s.cat])cats[s.cat]=[];cats[s.cat].push(s);});
+
+  let html='';
+  Object.entries(cats).forEach(([cat,stds])=>{
+    const ci=catInfo(cat);
+    html+=`<div class="cat-section">
+      <div class="cat-header">
+        <div class="cat-dot" style="background:${ci.color}"></div>
+        <span class="cat-label" style="color:${ci.color}">${ci.icon} ${cat}</span>
+        <span class="cat-count">${stds.length} standard${stds.length>1?'s':''}</span>
+      </div>
+      <div class="iso-grid">${stds.map(s=>cardHTML(s)).join('')}</div>
+    </div>`;
+  });
+
+  if(!html)html=`<div class="empty-state"><div class="empty-icon">🔍</div><div class="empty-msg">No standards match your filter. Try adjusting the search or filter.</div></div>`;
+  document.getElementById('cardsContainer').innerHTML=html;
+}
+
+function cardHTML(s){
+  const p=getProgress(s.id);const sc=getScore(s.id);const ci=catInfo(s.cat);
+  const done=p.ans===p.tot&&p.tot>0,inprog=p.ans>0&&!done;
+  let cls='iso-card '+(done?'complete':inprog?'started':'not-started');
+  return`<div class="${cls}" onclick="openAssess(${s.id})">
+    <div class="card-header">
+      <div class="card-cat-icon" style="background:${ci.bg};font-size:22px">${ci.icon}</div>
+      <div class="card-info">
+        <div class="card-std-line">
+          <span class="card-std">${s.std}</span>
+          ${s.acc?'<span class="badge badge-acc">✓ Accredited</span>':'<span class="badge badge-guide">Guidance</span>'}
+          ${s.isNew?'<span class="badge badge-new">New</span>':''}
+        </div>
+        <div class="card-name">${s.name}</div>
+      </div>
+    </div>
+    <div class="prog-bar"><div class="prog-fill" style="width:${p.pct}%"></div></div>
+    <div class="card-footer">
+      <span class="card-score-txt">${p.ans===0?'Not started':sc!==null?'Compliance: '+sc+'%':p.ans+'/'+p.tot+' answered'}</span>
+      <span class="${done?'card-cta-done':'card-cta'}">${done?'✓ Complete':p.ans>0?'Continue →':'Start →'}</span>
+    </div>
+  </div>`;
+}
+
+/* ── ASSESSMENT ── */
+const RTILES=[
+  {v:0,l:"Not started",emoji:"✗",dot:"var(--rag-r)"},
+  {v:1,l:"Partial",emoji:"◑",dot:"var(--rag-a)"},
+  {v:2,l:"Mostly met",emoji:"◕",dot:"var(--rag-b)"},
+  {v:3,l:"Fully met",emoji:"✓",dot:"var(--rag-g)"},
+];
+
+function openAssess(id){
+  curStd=id;
+  const s=STD.find(x=>x.id===id);
+  const cl=getClauses(id);const d=appData[id]||{};
+  document.getElementById('assessTitle').textContent=`${s.std} — ${s.name}`;
+  document.getElementById('assessDesc').textContent=s.desc;
+  updateProgHeader();
+  document.getElementById('clauseList').innerHTML=cl.map((c,i)=>`
+    <div class="clause-card" id="cc${i}">
+      <div class="cl-num"><span class="cl-dot"></span> Clause ${c.n}</div>
+      <div class="cl-title">${c.t}</div>
+      <div class="cl-guide">${c.g}</div>
+      <div class="rating-grid">
+        ${RTILES.map(r=>`<div class="r-tile${d[i]?.r===r.v?' sel-'+r.v:''}" onclick="rate(${i},${r.v},this)">
+          <div class="r-dot" style="${d[i]?.r===r.v?'background:'+r.dot:'background:var(--paper3)'}">${r.emoji}</div>
+          <div class="r-lbl">${r.l}</div>
+        </div>`).join('')}
+      </div>
+      <div class="field-label">Evidence & notes</div>
+      <textarea class="field-input" id="ev${i}" placeholder="Document what exists — reference numbers, records, procedures, observations…">${d[i]?.ev||''}</textarea>
+      <div class="field-label" style="margin-top:10px">Action plan (if gap exists)</div>
+      <textarea class="field-input" id="ac${i}" placeholder="Describe the action required to close this gap…">${d[i]?.ac||''}</textarea>
+      <div class="field-row" style="margin-top:6px">
+        <input class="field-input" id="ow${i}" placeholder="👤 Owner / responsible person" value="${d[i]?.ow||''}">
+        <input class="field-input" type="date" id="dt${i}" value="${d[i]?.dt||''}">
+      </div>
+    </div>
+  `).join('');
+  showScreen('screenAssess');setNav(null);
+  document.getElementById('pageTitle').textContent=s.name;
+  document.getElementById('pageSub').textContent=s.std+' · '+s.cat;
+}
+
+function rate(i,v,tile){
+  if(!appData[curStd])appData[curStd]={};
+  if(!appData[curStd][i])appData[curStd][i]={};
+  appData[curStd][i].r=v;
+  const parent=tile.closest('.rating-grid');
+  parent.querySelectorAll('.r-tile').forEach((t,idx)=>{
+    RTILES.forEach(r=>{t.classList.remove('sel-'+r.v);});
+    if(idx===v){
+      t.classList.add('sel-'+v);
+      t.querySelector('.r-dot').style.background=RTILES[v].dot;
+    } else {
+      t.querySelector('.r-dot').style.background='var(--paper3)';
+    }
+  });
+  updateProgHeader();
+}
+
+function updateProgHeader(){
+  const cl=getClauses(curStd);const d=appData[curStd]||{};
+  const ans=cl.filter((_,i)=>d[i]?.r!==undefined).length;
+  const pct=Math.round(ans/cl.length*100);
+  document.getElementById('phFill').style.width=pct+'%';
+  document.getElementById('phPct').textContent=pct+'%';
+  document.getElementById('phTxt').textContent=`${ans} / ${cl.length} clauses`;
+}
+
+function readFields(){
+  if(!curStd)return;
+  const cl=getClauses(curStd);
+  if(!appData[curStd])appData[curStd]={};
+  cl.forEach((_,i)=>{
+    if(!appData[curStd][i])appData[curStd][i]={};
+    ['ev','ac','ow','dt'].forEach(k=>{const el=document.getElementById(k+i);if(el)appData[curStd][i][k]=el.value;});
+  });
+}
+
+function saveAssess(toast){
+  readFields();saveData();renderCards();renderHomeStats();
+  if(toast)showToast('Progress saved');
+}
+
+function quickSave(){saveAssess(true);}
+
+/* ── RESULTS ── */
+const RATING_LABELS=["Not started","Partial","Mostly met","Fully met"];
+const RATING_COLORS=["var(--rag-r)","var(--rag-a)","var(--rag-b)","var(--rag-g)"];
+const RATING_BG=["var(--rag-r-bg)","var(--rag-a-bg)","var(--rag-b-bg)","var(--rag-g-bg)"];
+
+function showResults(){
+  saveAssess(false);
+  const s=STD.find(x=>x.id===curStd);
+  const cl=getClauses(curStd);const d=appData[curStd]||{};
+  document.getElementById('resTitle').textContent=`${s.std} — ${s.name}`;
+  const sc=getScore(curStd)||0;
+  const p=getProgress(curStd);
+  const gaps=cl.filter((_,i)=>d[i]?.r!==undefined&&d[i].r<2).length;
+  const actions=cl.filter((_,i)=>d[i]?.ac?.trim()).length;
+  // Compliance banner
+  document.getElementById('compBanner').innerHTML=`
+    <div><div class="cb-score">${sc}%</div><div class="cb-label">Compliance score</div></div>
+    <div class="cb-right">
+      <div style="font-size:13px;opacity:.8;margin-bottom:6px">${s.name} · ${p.ans}/${p.tot} clauses assessed</div>
+      <div class="cb-bar"><div class="cb-fill" style="width:${sc}%"></div></div>
+      <div class="cb-chips">
+        <span class="cb-chip">⚠️ ${gaps} gaps</span>
+        <span class="cb-chip">🎯 ${actions} actions</span>
+        <span class="cb-chip">${ragLabel(sc)}</span>
+      </div>
+    </div>
+  `;
+  const pcts=[0,33,66,100];
+  document.getElementById('resList').innerHTML=cl.map((c,i)=>{
+    const r=d[i];
+    if(!r||r.r===undefined)return`<div class="clause-result"><div class="cr-top"><span class="cr-badge" style="background:var(--paper3);color:var(--ink3)">Not assessed</span><span class="cr-title">Clause ${c.n} — ${c.t.split('—')[0].trim()}</span></div></div>`;
+    return`<div class="clause-result">
+      <div class="cr-top">
+        <span class="cr-badge" style="background:${RATING_BG[r.r]};color:${RATING_COLORS[r.r]}">${RATING_LABELS[r.r]}</span>
+        <span class="cr-title">Clause ${c.n} — ${c.t.split('—')[0].trim()}</span>
+      </div>
+      <div class="cr-bar"><div class="cr-fill" style="width:${pcts[r.r]}%;background:${RATING_COLORS[r.r]}"></div></div>
+      <div class="cr-notes">
+        ${r.ev?`<div class="cr-note"><span class="cr-note-icon">📝</span>${r.ev}</div>`:''}
+        ${r.ac?`<div class="cr-note"><span class="cr-note-icon">🎯</span>${r.ac}${r.ow?' — <strong>'+r.ow+'</strong>':''}${r.dt?' · Due: '+r.dt:''}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  showScreen('screenResults');setNav(null);
+  document.getElementById('pageTitle').textContent='Results: '+s.name;
+  document.getElementById('pageSub').textContent=s.std;
+}
+
+function backToAssess(){openAssess(curStd);}
+
+/* ── DASHBOARD ── */
+function showDashboard(){
+  saveAssess(false);
+  const started=STD.filter(s=>getProgress(s.id).ans>0).length;
+  const complete=STD.filter(s=>{const p=getProgress(s.id);return p.ans===p.tot&&p.tot>0}).length;
+  const scores=STD.map(s=>getScore(s.id)).filter(x=>x!==null);
+  const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  const actions=STD.reduce((a,s)=>{const cl=getClauses(s.id);const d=appData[s.id]||{};return a+cl.filter((_,i)=>d[i]?.ac?.trim()).length;},0);
+  document.getElementById('dashStats').innerHTML=`
+    <div class="stat-card"><div class="stat-icon">📋</div><div class="stat-num">${started}</div><div class="stat-lbl">Standards started</div></div>
+    <div class="stat-card stat-accent-green"><div class="stat-icon">✅</div><div class="stat-num">${complete}</div><div class="stat-lbl">Complete</div></div>
+    <div class="stat-card ${avg>=75?'stat-accent-green':avg>0?'stat-accent-amber':''}"><div class="stat-icon">📊</div><div class="stat-num">${avg||'—'}${avg?'%':''}</div><div class="stat-lbl">Avg compliance</div></div>
+    <div class="stat-card stat-accent-blue"><div class="stat-icon">🎯</div><div class="stat-num">${actions}</div><div class="stat-lbl">Action items</div></div>
+  `;
+  // List
+  document.getElementById('dashList').innerHTML=STD.filter(s=>getProgress(s.id).ans>0).map(s=>{
+    const sc=getScore(s.id);const pct=sc!==null?sc:getProgress(s.id).pct;
+    return`<div class="result-row" onclick="openAssess(${s.id})">
+      <div class="rt"><span class="rname">${s.std} — ${s.name}</span><span class="rscore ${scoreClass(sc)}">${sc!==null?sc+'%':getProgress(s.id).pct+'% done'}</span></div>
+      <div class="rbar"><div class="rfill ${fillClass(sc)}" style="width:${pct}%"></div></div>
+    </div>`;
+  }).join('')||'<div style="font-size:13px;color:var(--ink3);padding:8px 0">No assessments started yet.</div>';
+
+  // Radar chart by category
+  const catScores={};
+  Object.keys(CATEGORIES).forEach(c=>{
+    const stds=STD.filter(s=>s.cat===c);
+    const scores=stds.map(s=>getScore(s.id)).filter(x=>x!==null);
+    catScores[c]=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  });
+  const radarCats=Object.keys(catScores).filter(c=>catScores[c]>0||STD.some(s=>s.cat===c&&getProgress(s.id).ans>0));
+  const ctx=document.getElementById('radarChart').getContext('2d');
+  if(radarChart)radarChart.destroy();
+  radarChart=new Chart(ctx,{type:'radar',data:{
+    labels:radarCats.map(c=>CATEGORIES[c]?.icon+' '+c),
+    datasets:[{label:'Compliance %',data:radarCats.map(c=>catScores[c]),backgroundColor:'rgba(14,107,94,.15)',borderColor:'#0E6B5E',borderWidth:2,pointBackgroundColor:'#0E6B5E',pointRadius:4}]
+  },options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}},scales:{r:{min:0,max:100,ticks:{stepSize:25,font:{size:10}},grid:{color:'rgba(0,0,0,.07)'},pointLabels:{font:{size:10}}}}}});
+
+  // Actions
+  const acts=[];
+  STD.forEach(s=>{const cl=getClauses(s.id);const d=appData[s.id]||{};cl.forEach((c,i)=>{if(d[i]?.ac?.trim())acts.push({std:s.std,clause:c.n,action:d[i].ac,owner:d[i].ow||'—',due:d[i].dt||'No date set',rating:d[i].r});});});
+  document.getElementById('dashActions').innerHTML=acts.length?acts.map((a,n)=>`
+    <div class="action-row">
+      <div class="action-std">${n+1}. ${a.std} · Clause ${a.clause}</div>
+      <div class="action-txt">${a.action}</div>
+      <div class="action-meta"><span>👤 ${a.owner}</span><span>📅 ${a.due}</span><span style="color:${RATING_COLORS[a.rating||0]}">${RATING_LABELS[a.rating||0]}</span></div>
+    </div>`).join(''):'<div style="font-size:13px;color:var(--ink3);padding:8px 0">No action items yet. Add actions in the assessment for each gap.</div>';
+
+  showScreen('screenDash');setNav('navDash');
+  document.getElementById('pageTitle').textContent='Dashboard';
+  document.getElementById('pageSub').textContent='Compliance overview across all standards';
+}
+
+/* ── REPORT ── */
+function showReport(){
+  saveAssess(false);
+  document.getElementById('repDate').textContent='Generated: '+new Date().toLocaleString('en-GB',{day:'numeric',month:'long',year:'numeric',hour:'2-digit',minute:'2-digit'});
+  const assessed=STD.filter(s=>getProgress(s.id).ans>0);
+  const notStarted=STD.filter(s=>getProgress(s.id).ans===0);
+  const critical=[];assessed.forEach(s=>{const cl=getClauses(s.id);const d=appData[s.id]||{};cl.forEach((c,i)=>{if(d[i]?.r===0)critical.push({std:s.std,name:s.name,clause:c,ev:d[i]?.ev||''});});});
+  const acts=[];assessed.forEach(s=>{const cl=getClauses(s.id);const d=appData[s.id]||{};cl.forEach((c,i)=>{if(d[i]?.ac?.trim())acts.push({std:s.std,name:s.name,clause:c.n,action:d[i].ac,owner:d[i].ow||'—',due:d[i].dt||'—'});});});
+  const scores=STD.map(s=>getScore(s.id)).filter(x=>x!==null);
+  const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+
+  let html=`<div class="report-panel">
+    <div class="rp-title">📊 Executive summary</div>
+    <div class="rp-row"><div class="rp-lbl">Organisation</div><div class="rp-val">— (enter your organisation name)</div></div>
+    <div class="rp-row"><div class="rp-lbl">Standards assessed</div><div class="rp-val">${assessed.length} of ${STD.length}</div></div>
+    <div class="rp-row"><div class="rp-lbl">Average compliance</div><div class="rp-val"><span class="rp-rag ${avg>=75?'rp-g':avg>=50?'':avg>0?'rp-a':'rp-r'}">${avg}%</span></div></div>
+    <div class="rp-row"><div class="rp-lbl">Critical gaps</div><div class="rp-val">${critical.length?`<span class="rp-rag rp-r">⚠ ${critical.length} clauses at "Not started"</span>`:'<span class="rp-rag rp-g">None identified</span>'}</div></div>
+    <div class="rp-row"><div class="rp-lbl">Action items</div><div class="rp-val">${acts.length} items recorded across ${assessed.length} standards</div></div>
+  </div>`;
+
+  if(assessed.length){
+    html+=`<div class="report-panel"><div class="rp-title">📋 Standards assessed (${assessed.length})</div>
+    ${assessed.map(s=>{const sc=getScore(s.id)||0;const p=getProgress(s.id);return`<div class="rp-row"><div class="rp-lbl">${s.std}</div><div class="rp-val"><span class="rp-rag ${sc>=75?'rp-g':sc>=50?'':sc>0?'rp-a':'rp-r'}">${sc}%</span> ${s.name} &nbsp;·&nbsp; ${p.ans}/${p.tot} clauses</div></div>`;}).join('')}
+    </div>`;
+  }
+  if(critical.length){
+    html+=`<div class="report-panel"><div class="rp-title" style="color:var(--rag-r)">⚠ Critical gaps — Not started (${critical.length})</div>
+    ${critical.map(c=>`<div class="rp-row"><div class="rp-lbl">${c.std}</div><div class="rp-val">${c.name} · Clause ${c.clause.n}: ${c.clause.t}${c.ev?'<br><span style="color:var(--ink3);font-size:12px">'+c.ev+'</span>':''}</div></div>`).join('')}
+    </div>`;
+  }
+  if(acts.length){
+    html+=`<div class="report-panel"><div class="rp-title">🎯 Action plan (${acts.length} items)</div>
+    ${acts.map((a,n)=>`<div class="rp-row"><div class="rp-lbl">${n+1}. ${a.std}</div><div class="rp-val">Clause ${a.clause}: ${a.action}<br><span class="action-chip">👤 ${a.owner} &nbsp; 📅 ${a.due}</span></div></div>`).join('')}
+    </div>`;
+  }
+  if(notStarted.length){
+    html+=`<div class="report-panel"><div class="rp-title">⏳ Not yet assessed (${notStarted.length})</div>
+    ${notStarted.map(s=>`<div class="rp-row"><div class="rp-lbl">${s.std}</div><div class="rp-val">${s.name} ${s.isNew?'<span class="badge badge-new">New</span>':''} ${s.acc?'<span class="badge badge-acc">Accredited</span>':''}</div></div>`).join('')}
+    </div>`;
+  }
+  if(!assessed.length)html='<div class="report-panel"><p style="color:var(--ink3);font-size:14px;padding:8px 0">No assessments completed yet. Select a standard from the Standards tab to begin.</p></div>';
+  document.getElementById('reportContent').innerHTML=html;
+  showScreen('screenReport');setNav('navReport');
+  document.getElementById('pageTitle').textContent='Report & Export';
+  document.getElementById('pageSub').textContent='Full gap assessment report with action plan';
+}
+
+/* ── EXPORT TXT ── */
+function exportTXT(){
+  const lines=['GAPassesspro — ISO & CERTIFICATION GAP ASSESSMENT REPORT','='.repeat(60),'Generated: '+new Date().toLocaleString(),'Total standards: '+STD.length,'',''];
+  STD.forEach(s=>{
+    const p=getProgress(s.id);if(p.ans===0)return;
+    const sc=getScore(s.id)||0;
+    lines.push(`${s.std} — ${s.name}`);
+    lines.push(`Category: ${s.cat}  |  Compliance: ${sc}%  |  Clauses: ${p.ans}/${p.tot}  |  ${ragLabel(sc)}`);
+    lines.push('-'.repeat(60));
+    const cl=getClauses(s.id);const d=appData[s.id]||{};
+    cl.forEach((c,i)=>{
+      if(!d[i]||d[i].r===undefined)return;
+      lines.push(`  [${RATING_LABELS[d[i].r]}] Clause ${c.n}: ${c.t}`);
+      if(d[i].ev)lines.push(`    Evidence: ${d[i].ev}`);
+      if(d[i].ac)lines.push(`    Action: ${d[i].ac}`);
+      if(d[i].ow||d[i].dt)lines.push(`    Owner: ${d[i].ow||'—'}  |  Due: ${d[i].dt||'—'}`);
+    });
+    lines.push('');
+  });
+  const blob=new Blob([lines.join('\n')],{type:'text/plain'});
+  const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='GapAssess_Report_'+new Date().toISOString().slice(0,10)+'.txt';a.click();
+}
+
+/* ── EXPORT PDF ── */
+function exportPDF(){
+  const {jsPDF}=window.jspdf;
+  const doc=new jsPDF({unit:'mm',format:'a4'});
+  const W=210,ml=16,cw=178;let y=0;
+  const chk=()=>{if(y>272){doc.addPage();y=18;}};
+  const txt=(t,sz,bold,col)=>{
+    doc.setFontSize(sz||10);doc.setFont('helvetica',bold?'bold':'normal');
+    if(col)doc.setTextColor(...col);else doc.setTextColor(13,17,23);
+    const lines=doc.splitTextToSize(t,cw);
+    lines.forEach(l=>{chk();doc.text(l,ml,y);y+=sz?sz*0.42:4.5;});
+  };
+
+  // Cover page header
+  doc.setFillColor(14,107,94);doc.rect(0,0,210,28,'F');
+  doc.setFillColor(26,155,136);doc.rect(0,24,210,4,'F');
+  doc.setTextColor(255,255,255);doc.setFontSize(18);doc.setFont('helvetica','bold');
+  doc.text('GapAssess Pro',ml,12);
+  doc.setFontSize(10);doc.setFont('helvetica','normal');
+  doc.text('ISO & Certification Gap Assessment Report',ml,19);
+  doc.text('Generated: '+new Date().toLocaleString(),ml,26);
+  y=38;
+
+  // Summary block
+  const assessed=STD.filter(s=>getProgress(s.id).ans>0);
+  const scores=STD.map(s=>getScore(s.id)).filter(x=>x!==null);
+  const avg=scores.length?Math.round(scores.reduce((a,b)=>a+b,0)/scores.length):0;
+  const critical=[];assessed.forEach(s=>{const cl=getClauses(s.id);const d=appData[s.id]||{};cl.forEach((c,i)=>{if(d[i]?.r===0)critical.push({std:s.std,clause:c});});});
+  const acts=[];assessed.forEach(s=>{const cl=getClauses(s.id);const d=appData[s.id]||{};cl.forEach((c,i)=>{if(d[i]?.ac?.trim())acts.push({std:s.std,clause:c.n,action:d[i].ac,owner:d[i].ow||'—',due:d[i].dt||'—'});});});
+
+  doc.setFillColor(247,248,250);doc.roundedRect(ml,y-4,cw,28,2,2,'F');
+  txt('Executive Summary',13,true,[14,107,94]);y+=1;
+  txt(`Standards assessed: ${assessed.length} of ${STD.length}   |   Avg compliance: ${avg}%   |   Critical gaps: ${critical.length}   |   Actions: ${acts.length}`,9,false,[60,70,85]);
+  y+=8;
+
+  assessed.forEach(s=>{
+    chk();
+    const sc=getScore(s.id)||0;const p=getProgress(s.id);
+    doc.setFillColor(247,248,250);doc.rect(ml,y-3,cw,8,'F');
+    doc.setFillColor(14,107,94);doc.rect(ml,y-3,3,8,'F');
+    txt(`${s.std} — ${s.name}`,11,true,[14,107,94]);
+    txt(`Compliance: ${sc}%  |  Category: ${s.cat}  |  Clauses answered: ${p.ans}/${p.tot}`,8,false,[100,110,120]);
+    y+=2;
+    const cl=getClauses(s.id);const d=appData[s.id]||{};
+    cl.forEach((c,i)=>{
+      if(!d[i]||d[i].r===undefined)return;
+      chk();
+      const col=[[220,38,38],[217,119,22],[37,99,235],[22,163,74]][d[i].r];
+      doc.setFillColor(...col);doc.circle(ml+2,y-1.5,1.5,'F');
+      doc.setFontSize(9);doc.setFont('helvetica','bold');doc.setTextColor(...col);
+      doc.text(RATING_LABELS[d[i].r],ml+5,y);
+      doc.setFont('helvetica','normal');doc.setTextColor(30,30,30);
+      const t=doc.splitTextToSize(`Clause ${c.n}: ${c.t}`,cw-30);
+      doc.text(t,ml+38,y);y+=t.length*4+1;
+      if(d[i].ac){
+        doc.setTextColor(37,99,235);
+        const at=doc.splitTextToSize(`→ ${d[i].ac}${d[i].ow?' ('+d[i].ow+')':''}${d[i].dt?' · '+d[i].dt:''}`,cw-8);
+        doc.setFontSize(8);doc.text(at,ml+5,y);y+=at.length*3.8+1;
+      }
+      doc.setTextColor(30,30,30);
+    });
+    y+=5;
+  });
+  doc.save('GapAssess_Report_'+new Date().toISOString().slice(0,10)+'.pdf');
+}
+
+/* ── NAV ── */
+function showHome(){
+  renderHomeStats();renderCards();
+  showScreen('screenHome');setNav('navHome');
+  document.getElementById('pageTitle').textContent='All Standards';
+  document.getElementById('pageSub').textContent='Select a standard to begin your gap assessment';
+}
+
+function showScreen(id){
+  document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0,0);
+}
+
+function setNav(id){
+  document.querySelectorAll('.nav-item').forEach(b=>{b.classList.toggle('active',b.id===id)});
+  document.getElementById('navHomeBadge').textContent=STD.length;
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent='✓ '+msg;
+  t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+/* ── INIT ── */
+renderHomeStats();renderCards();
+</script>
+</body>
+</html>
